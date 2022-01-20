@@ -10,3 +10,11 @@ Feature: Load INRstar for given locale and perform tests
         Examples:
             | file | 
             | INRstar_UKLogin.json |
+
+    Scenario Outline: Login and create patient
+        Given the user logs into INRstar with detais in "<file>"
+        When the user adds a new patient
+        #Then a new treatment plan can be added
+        Examples:
+            | file | 
+            | INRstar_UKLogin.json |

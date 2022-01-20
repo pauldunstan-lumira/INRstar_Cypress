@@ -38,4 +38,17 @@ Then('the home page has loaded', () => {
         cy.get('[aria-labelledby="ui-dialog-title-modalDialogBox"] > .ui-dialog-buttonpane > .ui-dialog-buttonset > .ui-button > .ui-button-text').click();
         //clear the email pop up
         cy.get('[aria-labelledby="ui-dialog-title-modalDialogBox"] > .ui-dialog-buttonpane > .ui-dialog-buttonset > :nth-child(1) > .ui-button-text').click();
-})
+});
+
+Given('the user logs into INRstar with detais in {string}', (file) => {
+        cy.fixture(file).then(data => {
+                //set timezone
+                cy.stubBrowserTimezone(data.timeZone)
+                //Open and load INRstar login page
+                cy.login_to_INRstar(data.url, data.username, data.password)
+        })
+});
+
+When('the user adds a new patient', () =>{
+        cy.add_new_patient('m')
+});
