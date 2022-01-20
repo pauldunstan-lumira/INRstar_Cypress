@@ -63,47 +63,25 @@ Cypress.Commands.add('stubBrowserTimezone', (timeZone) => {
     })
 });
 //-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('get_email_verification_code_and_enter', (email_address, email_subject, after_datetime, popup1, popup2, email_count = parseInt('0')) => {
-    {
-        cy.task("gmail:get-messages", {
-            options: {
-                subject: email_subject,
-                to: email_address,
-                after: after_datetime,
-                include_body: true
-            }
-        })
-            .then(emails => {
-                //Check that we actually have an email - log if not
-                if (emails.length == 0) {
-                    email_count = email_count + 1;
-                    if (email_count < 10) {
-                        cy.log("** Expected to find an email - no luck with attempt: " + email_count + " out of 10 - Trying again **")
-                        cy.get_email_verification_code_and_enter(email_address, email_subject, after_datetime, popup1, popup2, email_count);
-                    }
-                    else {
-                        cy.log("Email has not arrived gave up after attempt: " + email_count);
-                    }
-                }
-                if (emails.length > 0) {
-                    cy.log("******* Expected *** " + email_subject + " *** email found *******")
-                    //take the body of the last email and pass into content variable 
-                    const content = emails[0].body.html;
-                    //get the reset code and pass into code variable
-                    var code = content.match(/>[a-z0-9]{4}-[a-z0-9]{4}</)
-                    //remove html tags from code
-                    cy.get('[id=button_popup_ok]').click()
-                    //wait for popup to close
-                    cy.get('[id=information_' + popup1 + ']', { timeout: 10000 }).should("not.exist");
-                    cy.get('[id=information_' + popup2 + ']', { timeout: 10000 }).should("not.exist");
-                    cy.get('.RegisterTab__AddOn--2jg-j > .input__FieldWrap--12OkK > .input__TextInput--25xpW', { timeout: 1000 })
-                        .click()
-                        .type(code[0].slice(1, 10))
-                    //click the submit button
-                    cy.get('[class=RegisterTab__SendBtn--_COts]').click()
-                }
-            })
-    }
+//INRSTAR
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('INRstar_login_page_has_loaded', (url) => {
+    cy.visit(url)
+    cy.get('#LoginButton', { timeout: 10000 }).should('be.enabled')
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('enter_username_and_confirm', (username) => {
+    cy.get('#Username')
+    .type(username)
+    //add check to make sure the data is displayed
+    .should('have.value', username)
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('enter_password_and_confirm', (password) => {
+    cy.get('#Password')
+    .type(password)
+    //add check to make sure the data is displayed
+    .should('have.value', password)
 })
 //-------------------------------------------------------------------------------------------------------------------
 Cypress.Commands.add('enter_DOB_in_date_picker', (DOB, timeZone) => {
