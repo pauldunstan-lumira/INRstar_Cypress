@@ -1,0 +1,14 @@
+@UI
+Feature: Navigate to Google.com and verifying title
+    @smoke @test
+    Scenario: Perform Navigation
+        Given I open the Google web url
+        Then I verify title of web page as 'Google'
+
+    Scenario Outline: Perform Navigation to AWS engage 
+        Given I open the UK Test1 web "<url>"
+        Then I verify title of web page as 'Google'
+        Examples:
+            | url |
+            | https://engage-uk.caresolutions.lumiradx.com/ |
+

@@ -1,0 +1,18 @@
+{
+"chromeWebSecurity": false,
+"testFiles": "**/*.{feature,features}",
+"ignoreTestFiles": ["**/stepDefinitions/*","*.js", "*.md"],
+"retries": 1,
+"reporter": "cypress-mochawesome-reporter",
+  "reporterOptions": {
+      "reportDir": "cypress/report/mochawesome-report",
+      "overwrite": false,
+      "html": false,
+      "json": false,
+      "charts":true,
+      "reportPageTitle":"",
+      "embeddedScreenshots":true,
+      "timestamp": "mmddyyyy_HHMMss"
+   },
+   "screenshotsFolder": "cypress/report/mochawesome-report/assets"
+}
