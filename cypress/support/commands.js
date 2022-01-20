@@ -23,6 +23,68 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+//-------------------------------------------------------------------------------------------------------------------
+//INRSTAR
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('INRstar_login_page_has_loaded', (url) => {
+    cy.visit(url)
+    cy.get('#LoginButton', { timeout: 10000 }).should('be.enabled')
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('enter_username_and_confirm', (username) => {
+    cy.get('#Username')
+    .type(username)
+    //add check to make sure the data is displayed
+    .should('have.value', username)
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('enter_password_and_confirm', (password) => {
+    cy.get('#Password')
+    .type(password)
+    //add check to make sure the data is displayed
+    .should('have.value', password)
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('login_to_INRstar', (url, username, password) => {
+    cy.visit(url)
+    cy.get('#LoginButton', { timeout: 10000 }).should('be.enabled')
+    cy.get('#Username')
+    .type(username)
+    //add check to make sure the data is displayed
+    .should('have.value', username)
+    cy.get('#Password')
+    .type(password)
+    //add check to make sure the data is displayed
+    .should('have.value', password)
+    //click login button
+    cy.get('#LoginButton').click()
+    //clear out of date client error
+    cy.get('[aria-labelledby="ui-dialog-title-modalDialogBox"] > .ui-dialog-buttonpane > .ui-dialog-buttonset > .ui-button > .ui-button-text').click();
+    //clear the email pop up
+    cy.get('[aria-labelledby="ui-dialog-title-modalDialogBox"] > .ui-dialog-buttonpane > .ui-dialog-buttonset > :nth-child(1) > .ui-button-text').click();
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('add_new_patient', (gender) => {
+    //click the patient tab
+    cy.get('#MainPatientLink').click();
+    //click the add patient tab
+    cy.get('#AddPatientDetailsTab').click();
+    //enter patient data
+    //patient no
+    //cy.get('#PatientNumber').type(faker.datatype.uuid())
+    //title
+    if (gender == 'M') {
+        cy.get('#Title').select('Mr')
+    } else {
+        cy.get('#Title').select('Mrs')
+    }
+
+})
+//-------------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------------
+//ENGAGE
+//-------------------------------------------------------------------------------------------------------------------
 Cypress.Commands.add('getIframe', (iframe) => {
     return cy.get(iframe)
         .its('0.contentDocument.body')
@@ -62,28 +124,7 @@ Cypress.Commands.add('stubBrowserTimezone', (timeZone) => {
         )
     })
 });
-//-------------------------------------------------------------------------------------------------------------------
-//INRSTAR
-//-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('INRstar_login_page_has_loaded', (url) => {
-    cy.visit(url)
-    cy.get('#LoginButton', { timeout: 10000 }).should('be.enabled')
-})
-//-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('enter_username_and_confirm', (username) => {
-    cy.get('#Username')
-    .type(username)
-    //add check to make sure the data is displayed
-    .should('have.value', username)
-})
-//-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('enter_password_and_confirm', (password) => {
-    cy.get('#Password')
-    .type(password)
-    //add check to make sure the data is displayed
-    .should('have.value', password)
-})
-//-------------------------------------------------------------------------------------------------------------------
+
 Cypress.Commands.add('enter_DOB_in_date_picker', (DOB, timeZone) => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const itMonths = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicenbre']
