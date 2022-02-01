@@ -8,7 +8,7 @@ Feature: Load INRstar for given locale and perform tests
         And the user clicks the Login button
         Then the home page has loaded
         Examples:
-            | file | 
+            | file |
             | INRstar_UKLogin.json |
 
     Scenario Outline: Login and create patient
@@ -18,3 +18,10 @@ Feature: Load INRstar for given locale and perform tests
         Examples:
             | file | 
             | INRstar_UKLogin.json |
+
+    Scenario Outline: Login under the hood and create patient
+        Given the user logs into INRstar UTD with detais in "<file>"
+        Examples:
+            | file | 
+            | INRstar_UKLogin.json |
+        
