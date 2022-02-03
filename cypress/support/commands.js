@@ -30,6 +30,7 @@
 const faker = require('@faker-js/faker');
 //import custom commands
 import './patient'
+import './misc'
 //-------------------------------------------------------------------------------------------------------------------
 Cypress.Commands.add('INRstar_login_page_has_loaded', (url) => {
     cy.visit(url)
@@ -98,7 +99,7 @@ Cypress.Commands.add('login_to_INRstar_under_the_hood', (url, username, password
         });
 })
 //-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('create_patient_to_INRstar_under_the_hood', (url, username, password) => {
+Cypress.Commands.add('create_patient_in_INRstar_under_the_hood', (url, username, password) => {
     //make sure session is logged out
     let logoutURL = url + 'Security/Authentication/LogOff'
     cy.visit({
@@ -143,6 +144,7 @@ Cypress.Commands.add('create_patient_to_INRstar_under_the_hood', (url, username,
                     let newRequestVerificationToken = body.match(/name="__RequestVerificationToken" type="hidden" value="([^"]*)/)[1];
                     //Add new patient using the above Id and requestVerificationToken
                     cy.generate_patient_data("Italian").as('patient').then((patient) => {
+
                         cy.log(newPatientGUID);
                         let insertURL = url + 'Patient/Insert'
                         cy.request({
@@ -169,7 +171,6 @@ Cypress.Commands.add('create_patient_to_INRstar_under_the_hood', (url, username,
                             }
                         })
                             .then((resp) => {
-                                // redirect status code is 302
                                 expect(resp.status).to.eq(200)
                             })
                     })
@@ -179,14 +180,32 @@ Cypress.Commands.add('create_patient_to_INRstar_under_the_hood', (url, username,
         })
 })
 //-------------------------------------------------------------------------------------------------------------------
-Cypress.Commands.add('add_new_patient', () => {
+Cypress.Commands.add('add_new_patient', (language) => {
     //click the patient tab
     cy.get('#MainPatientLink').click();
     //click the add patient tab
     cy.get('#AddPatientDetailsTab').click();
     //enter patient data
-    cy.generate_patient_data("Italian").as('patient').then((patient) => {
+    cy.generate_patient_data(language).as('patient').then((patient) => {
         cy.get('#PatientNumber').type(patient.patientnumber)
+        let NHSNumber
+        if (language == "Italian") {
+            let gender_char = patient.gender.substring(0,1)
+            
+            cy.generate_fiscal_code(patient.firstname, patient.familyname, patient.dob, gender_char)
+            .then(value => {
+                NHSNumber = value
+                cy.log("Fiscal Code to type: " + NHSNumber);
+                cy.get('#NHSNumber').type(NHSNumber)
+            })
+        } else {
+            cy.generate_NHS_Number()
+            .then(value => {
+                NHSNumber = value
+                cy.log("NHSNumber to type: " + NHSNumber)
+                cy.get('#NHSNumber').type(NHSNumber)
+            })
+        }
         cy.get('#Title').select(patient.title)
         cy.get('#Surname').type(patient.familyname)
         cy.get('#FirstName').type(patient.firstname)
@@ -194,14 +213,17 @@ Cypress.Commands.add('add_new_patient', () => {
         cy.get('.ui-datepicker-trigger').click()
         //select year
         cy.get('.ui-datepicker-year').contains(patient.year_of_birth)
-        .then(element => {
-            var text = element.text();
-            cy.get('.ui-datepicker-year').select(text);
+            .then(element => {
+                var text = element.text();
+                cy.get('.ui-datepicker-year').select(text);
             });
         //select month
         cy.get('.ui-datepicker-month').select(patient.month_of_birth_for_language)
         //select day of month
         cy.get('.ui-datepicker-calendar').contains(patient.day_of_birth.replace(/^0+/, '')).click()
+        //check calendar has closed
+        cy.get('#ui-datepicker-div', { timeout: 5000 }).should('not.be.visible')
+        //
         cy.get('#Sex').select(patient.gender)
         cy.get('#Gender').select(patient.gender)
         cy.get('#FirstLineAddress').type(patient.address_line1)
@@ -209,9 +231,106 @@ Cypress.Commands.add('add_new_patient', () => {
         cy.get('#County').type(patient.address_line5)
         cy.get('#Phone').type(patient.address_phone)
         cy.get('#Email').type(patient.email)
+        //setup intecept for insert
+        cy.intercept('POST', '**/Patient/Insert**')
+            .as('patient_insert')
         //save the patient details
         cy.get('#AddPatientDetails').click()
+        //wait for response from save
+        cy.wait('@patient_insert').its('response.statusCode')
+            .should('equal', 200)
+        //wait for dialogue box to disappear
+        cy.get('[aria-labelledby="ui-dialog-title-loading"]', { timeout: 10000 }).should('not.be.visible')
     })
+})
+//-------------------------------------------------------------------------------------------------------------------
+Cypress.Commands.add('add_new_treatment_plan', (drug, algorithm, dosingMethod) => {
+    //click the treatmentplan tab
+    cy.intercept('GET', '**/TreatmentPlan/ViewRecord**')
+        .as('view_tp')
+    cy.get('#PatientTreatmentPlanTabSubMenus > .selected > #PatientTreatmentPlanTab').click();
+    //click the new treatment plan button
+    cy.wait('@view_tp').its('response.statusCode')
+        .should('equal', 200)
+    cy.get('#AddPatientTreatmentPlanLink').click()
+    //select plan start date
+    let today = new Date();
+    let start_date = new Date(new Date().setDate(today.getDate() - 365));
+    cy.log(start_date)
+    let start_year = start_date.getFullYear()
+    //click the date picker
+    cy.get('.ui-datepicker-trigger').click()
+    //select year
+    cy.get('.ui-datepicker-year').contains(start_year)
+        .then(element => {
+            var text = element.text();
+            cy.get('.ui-datepicker-year').select(text);
+        });
+    //get month
+    let start_month
+    cy.date_string_generator_month("Italian").then(value => {
+        start_month = value
+        cy.log("returned " + value)
+        // let start_day = faker.datatype.number({
+        //     'min': 1,
+        //     'max': 28
+        // });
+        cy.log("Year: " + start_year + " Month: " + start_month + " Day: " + start_day)
+        //select month
+        cy.get('.ui-datepicker-month').select(start_month)
+    })
+    let start_day = faker.datatype.number({
+        'min': 1,
+        'max': 28
+    });
+    //select day of month
+    cy.get('.ui-datepicker-calendar').contains(start_day).click()
+    //check calendar has closed
+    cy.get('#ui-datepicker-div', { timeout: 5000 }).should('not.be.visible')
+    //intercept drug list call after selecting diagnosis
+    cy.intercept('GET', '**/TreatmentPlan/GetDrugList**')
+        .as('get_drug_list')
+    //select Diagnosis. using atrial fibrilation guid
+    cy.get('#DiagnosisSelected').select('09e47469-d231-41d4-a8bd-1a2d344941f7')
+    //wait for drug selector to load
+    cy.wait('@get_drug_list').its('response.statusCode')
+        .should('equal', 200)
+    //intercept drug change check after selecting
+    cy.intercept('GET', '**/TreatmentPlan/ChangeDrug**')
+        .as('change_drug')
+    //select drug using value in file 
+    cy.get(':nth-child(4) > #DrugId').select(drug)
+    //wait for algorithm selector to load
+    cy.wait('@change_drug').its('response.statusCode')
+        .should('equal', 302)
+    //intercept algorithm information call after selecting 
+    cy.intercept('GET', '**/Dosing/ViewInformation**')
+        .as('view_info')
+    //select algorithm using value in file
+    cy.get('#DosingMethod').select(algorithm)
+    //wait for confirmation dialogue to load
+    cy.wait('@view_info').its('response.statusCode')
+        .should('equal', 200)
+    //clear algorithm warning message
+    cy.get('[aria-labelledby="ui-dialog-title-modalDialogBox"] > .ui-dialog-buttonpane > .ui-dialog-buttonset > .ui-button > .ui-button-text')
+        .click()
+    //wait for testing method
+    cy.get('#TestingMethod', { timeout: 5000 }).should('be.enabled')
+        .select(dosingMethod)
+    //intercept call for adding tp
+    cy.intercept('POST', '**/TreatmentPlan/Add**')
+        .as('add_tp')
+    //save tp
+    cy.get('#AddPatientTreatmentPlan').click()
+    //intercept call for loading patient view after saving tp
+    cy.intercept('GET', '**/Patient/ViewRecord**')
+        .as('view_p')
+    //confirm save
+    cy.wait('@add_tp').its('response.statusCode')
+        .should('equal', 200)
+    //back to the patient view after saving
+    cy.wait('@view_p').its('response.statusCode')
+        .should('equal', 200)
 })
 // //-------------------------------------------------------------------------------------------------------------------
 
