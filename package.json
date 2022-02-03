@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@faker-js/faker": "^6.0.0-alpha.3",
     "cypress": "^9.1.0",
     "cypress-cucumber-preprocessor": "^4.2.0",
     "cypress-mochawesome-reporter": "^2.3.0",

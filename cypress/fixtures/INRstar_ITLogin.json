@@ -1,0 +1,10 @@
+{
+  "timeZone": "Europe/Rome",
+  "region": "Italian",
+  "url": "https://inrstar-it-test1.caresolutions.lumiradx.com/",
+  "username": "pauld@engage",
+  "password": "INRstar_5",
+  "drug": "Warfarin (Coumadin)",
+  "algorithm": "Manual Dosing",
+  "dosingMethod": "Lab"
+}
