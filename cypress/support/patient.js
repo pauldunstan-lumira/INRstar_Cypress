@@ -103,7 +103,6 @@ Cypress.Commands.add("generate_patient_data", (language) => {
     //Email creator
     let test_email = "automationlumira@gmail.com"
     let email_prefix = test_email.substring(0, test_email.length - 10)
-    //email_prefix.substring(0, env.gmail_test_account.length - 15)
     patient.email = email_prefix + '+' + Math.floor(Date.now() / 1000) + '@gmail.com';
 
     cy.wrap(patient);
