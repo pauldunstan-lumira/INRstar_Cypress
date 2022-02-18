@@ -271,10 +271,6 @@ Cypress.Commands.add('add_new_treatment_plan', (drug, algorithm, dosingMethod) =
     cy.date_string_generator_month("Italian").then(value => {
         start_month = value
         cy.log("returned " + value)
-        // let start_day = faker.datatype.number({
-        //     'min': 1,
-        //     'max': 28
-        // });
         cy.log("Year: " + start_year + " Month: " + start_month + " Day: " + start_day)
         //select month
         cy.get('.ui-datepicker-month').select(start_month)

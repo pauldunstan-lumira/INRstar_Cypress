@@ -9,7 +9,7 @@ import { Settings, DateTime } from "luxon";
 Given('the user opens the INRstar url supplied in {string} and the page has loaded', (file) => {
         cy.fixture(file).then(data => {
                 //set timezone
-                cy.stubBrowserTimezone(data.timeZone)
+                cy.stubBrowserTimezone(data.timeZone)//not really needed
                 //Open and load INRstar login page
                 cy.INRstar_login_page_has_loaded(data.url)
         })
@@ -45,7 +45,7 @@ Then('the home page has loaded', () => {
 Given('the user logs into INRstar with detais in {string}', (file) => {
         cy.fixture(file).then(data => {
                 //set timezone
-                cy.stubBrowserTimezone(data.timeZone)
+                cy.stubBrowserTimezone(data.timeZone)//not really needed
                 //Open and load INRstar login page
                 cy.login_to_INRstar(data.url, data.username, data.password)
         })
@@ -67,7 +67,7 @@ Given('the user logs into INRstar UTD with detais in {string}', (file) => {
         cy.fixture(file).then(data => {
                 cy.fixture(file).then(data => {
                         //set timezone
-                        cy.stubBrowserTimezone(data.timeZone)
+                        cy.stubBrowserTimezone(data.timeZone)//not really needed
                         //Open and load INRstar login page
                         //cy.login_to_INRstar_under_the_hood(data.url, data.username, data.password)
                         cy.create_patient_in_INRstar_under_the_hood(data.url, data.username, data.password);
